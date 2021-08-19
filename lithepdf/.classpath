@@ -18,5 +18,11 @@
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/styled-xml-parser-7.1.16.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/svg-7.1.16.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/gson-2.8.5.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/forms-7.1.16.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/barcodes-7.1.16.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/font-asian-7.1.16.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/hyph-7.1.16.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/pdfa-7.1.16.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/sign-7.1.16.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
