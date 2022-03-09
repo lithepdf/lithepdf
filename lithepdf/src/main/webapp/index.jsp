@@ -43,7 +43,7 @@
 		Convertir
 	</div>
 	<div class="card-body">
-		<form method="POST" action="lithepdfservlet">
+		<form method="POST" action="lithepdfservlet" target="_blank">
 			<div class="mb-3">
 				<label for="urltext" class="form-label">URL</label>
 		    	<input type="text" class="form-control" id="urltext" name="urltext" aria-describedby="urlhelp">
@@ -60,7 +60,7 @@
 </div>
 
 
-<p>Source code available at <a href="https://github.com/lithepdf/lithepdf">git</a> </p>
+<p>Source code available at <a href="https://github.com/lithepdf/lithepdf">GitHub</a> </p>
 
 </body>
 </html>
