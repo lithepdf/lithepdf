@@ -28,7 +28,10 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.itextpdf.html2pdf.ConverterProperties;
 import com.itextpdf.html2pdf.HtmlConverter;
+import com.itextpdf.html2pdf.resolver.font.DefaultFontProvider;
 
 
 @WebServlet(urlPatterns = "/lithepdfservlet", loadOnStartup = 1)
@@ -49,7 +52,9 @@ public class LithePdfServlet extends HttpServlet {
 		//HtmlToPdf.createPdf(new URL(urlText), absolutePath + filenameText);
 		System.out.println("LithePDF: Generando PDF de URL decodificada: " + urlText);
 
-		HtmlConverter.convertToPdf(new URL(urlText).openStream(), new FileOutputStream(absolutePath + filenameText));
+	    ConverterProperties properties = new ConverterProperties();
+	    properties.setFontProvider(new DefaultFontProvider());
+		HtmlConverter.convertToPdf(new URL(urlText).openStream(), new FileOutputStream(absolutePath + filenameText), properties);
 
 		// Obtiene archivo
 		//System.out.println("Ruta: " + absolutePath + fileName);
