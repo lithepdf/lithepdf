@@ -39,6 +39,7 @@ public class LithePdfServlet extends HttpServlet {
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 		String filenameText = request.getParameter("filenametext");
+		String isDownload = request.getParameter("isdownload");
 
 		// Decodifica la cadena
 		String urlText = decodeQueryString(request.getParameter("urltext"));
@@ -48,6 +49,8 @@ public class LithePdfServlet extends HttpServlet {
 
 		//HtmlToPdf.createPdf(new URL(urlText), absolutePath + filenameText);
 		System.out.println("LithePDF: Generando PDF de URL decodificada: " + urlText);
+		
+		if (isDownload.equals("1"))response.setHeader("Content-disposition","attachment; filename=" + filenameText);
 
 	    ConverterProperties properties = new ConverterProperties();
 	    properties.setFontProvider(new DefaultFontProvider());
