@@ -48,15 +48,33 @@ public class LithePdfServlet extends HttpServlet {
 		
 			// Decodifica la cadena
 			String urlText = decodeQueryString(request.getParameter("urltext"));
-		
+
+			String orient = parameterToString(request, "ornt");
+			
 			// Determina ubicacion y nombre a asignar
 			String absolutePath = request.getServletContext().getRealPath("") + File.separator + "fileupload" + File.separator;
-		
-			//HtmlToPdf.createPdf(new URL(urlText), absolutePath + filenameText);
-			System.out.println("LithePDF: Generando PDF de URL decodificada: " + urlText + ", Query original: " + request.getParameter("urltext"));
 			
-			HtmlConverter.convertToPdf(new URL(urlText).openStream(), new FileOutputStream(absolutePath + filenameText));
-		
+			//HtmlToPdf.createPdf(new URL(urlText), absolutePath + filenameText);
+			System.out.println("LithePDF GET: Generando PDF de URL decodificada: " + urlText + ", Query original: " + request.getParameter("urltext"));
+			
+			// Propiedades
+		    ConverterProperties properties = new ConverterProperties();
+		    properties.setFontProvider(new DefaultFontProvider());
+			
+		    // Documento
+		    PdfDocument pdfDocument = new PdfDocument(new PdfWriter(new FileOutputStream(absolutePath + filenameText)));
+		    
+		    // Determina orientacion
+		    if (orient.equalsIgnoreCase("h")) {
+		    	pdfDocument.setDefaultPageSize(PageSize.LETTER.rotate());
+		    } else if (urlText.contains("ornt=h")) {
+		    	// No es instruccion directa, sino de la liga adjunta
+		    	pdfDocument.setDefaultPageSize(PageSize.LETTER.rotate());
+		    }
+		    
+		    // Convierte
+		    HtmlConverter.convertToPdf(new URL(urlText).openStream(), pdfDocument, properties);
+			
 			// Obtiene archivo
 			File file = new File(absolutePath + filenameText);
 		
@@ -102,7 +120,7 @@ public class LithePdfServlet extends HttpServlet {
 				String absolutePath = request.getServletContext().getRealPath("") + File.separator + "fileupload" + File.separator;
 		
 				//HtmlToPdf.createPdf(new URL(urlText), absolutePath + filenameText);
-				System.out.println("LithePDF: Generando PDF de URL decodificada: " + urlText);
+				System.out.println("LithePDF POST: Generando PDF de URL decodificada: " + urlText);
 				
 				if (isDownload != null && isDownload.equals("1")) {
 					response.setHeader("Content-disposition","attachment; filename=" + filenameText);
@@ -116,8 +134,12 @@ public class LithePdfServlet extends HttpServlet {
 			    PdfDocument pdfDocument = new PdfDocument(new PdfWriter(new FileOutputStream(absolutePath + filenameText)));
 			    
 			    // Determina orientacion
-			    if (orient.equalsIgnoreCase("h"))
+			    if (orient.equalsIgnoreCase("h")) {
 			    	pdfDocument.setDefaultPageSize(PageSize.LETTER.rotate());
+			    } else if (urlText.contains("ornt=h")) {
+			    	// No es instruccion directa, sino de la liga adjunta
+			    	pdfDocument.setDefaultPageSize(PageSize.LETTER.rotate());
+			    }
 			    
 			    // Convierte
 			    HtmlConverter.convertToPdf(new URL(urlText).openStream(), pdfDocument, properties);
