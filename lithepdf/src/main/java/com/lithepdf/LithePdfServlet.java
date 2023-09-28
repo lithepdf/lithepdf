@@ -23,43 +23,43 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.URL;
+
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.itextpdf.html2pdf.ConverterProperties;
 import com.itextpdf.html2pdf.HtmlConverter;
 import com.itextpdf.html2pdf.resolver.font.DefaultFontProvider;
+import com.itextpdf.kernel.geom.PageSize;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
 
-
+@MultipartConfig
 public class LithePdfServlet extends HttpServlet {
 	private static final long serialVersionUID =1L;
 
 	// Obtiene los parametros
-	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
+	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	
 		String filenameText = request.getParameter("filenametext");
-		String isDownload = request.getParameter("isdownload");
-
+	
 		// Decodifica la cadena
 		String urlText = decodeQueryString(request.getParameter("urltext"));
-
+	
 		// Determina ubicacion y nombre a asignar
 		String absolutePath = request.getServletContext().getRealPath("") + File.separator + "fileupload" + File.separator;
-
+	
 		//HtmlToPdf.createPdf(new URL(urlText), absolutePath + filenameText);
-		System.out.println("LithePDF: Generando PDF de URL decodificada: " + urlText);
+		System.out.println("LithePDF: Generando PDF de URL decodificada: " + urlText + ", Query original: " + request.getParameter("urltext"));
 		
-		if (isDownload.equals("1"))response.setHeader("Content-disposition","attachment; filename=" + filenameText);
-
-	    ConverterProperties properties = new ConverterProperties();
-	    properties.setFontProvider(new DefaultFontProvider());
-		HtmlConverter.convertToPdf(new URL(urlText).openStream(), new FileOutputStream(absolutePath + filenameText), properties);
-
+		HtmlConverter.convertToPdf(new URL(urlText).openStream(), new FileOutputStream(absolutePath + filenameText));
+	
 		// Obtiene archivo
-		//System.out.println("Ruta: " + absolutePath + fileName);
 		File file = new File(absolutePath + filenameText);
-
+	
 		// Prepara archivo para enviarse al navegador
 		OutputStream out = response.getOutputStream();
 		FileInputStream in = new FileInputStream(file);
@@ -70,43 +70,93 @@ public class LithePdfServlet extends HttpServlet {
 		}
 		in.close();
 		out.flush();
-
+	
 		// Elimina el archivo creado
 		file.delete();	
 	}
 
 	// Obtiene los parametros
-	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-		String filenameText = request.getParameter("filenametext");
+		String filenameText = parameterToString(request, "filenametext");
+		String isDownload = parameterToString(request, "isdownload");
+		String urlTextRaw = parameterToString(request, "urltext");
+		String orient = parameterToString(request, "ornt");
 
-		// Decodifica la cadena
-		String urlText = decodeQueryString(request.getParameter("urltext"));
-
-		// Determina ubicacion y nombre a asignar
-		String absolutePath = request.getServletContext().getRealPath("") + File.separator + "fileupload" + File.separator;
-
-		//HtmlToPdf.createPdf(new URL(urlText), absolutePath + filenameText);
-		System.out.println("LithePDF: Generando PDF de URL decodificada: " + urlText + ", Query original: " + request.getParameter("urltext"));
+		if (urlTextRaw != null && !urlTextRaw.equals("")) {
+			// Decodifica la cadena
+			String urlText = decodeQueryString(urlTextRaw);
+	
+			// Determina ubicacion y nombre a asignar
+			String absolutePath = request.getServletContext().getRealPath("") + File.separator + "fileupload" + File.separator;
+	
+			//HtmlToPdf.createPdf(new URL(urlText), absolutePath + filenameText);
+			System.out.println("LithePDF: Generando PDF de URL decodificada: " + urlText);
+			
+			if (isDownload != null && isDownload.equals("1")) {
+				response.setHeader("Content-disposition","attachment; filename=" + filenameText);
+			}
+	
+			// Propiedades
+		    ConverterProperties properties = new ConverterProperties();
+		    properties.setFontProvider(new DefaultFontProvider());
+			
+		    // Documento
+		    PdfDocument pdfDocument = new PdfDocument(new PdfWriter(new FileOutputStream(absolutePath + filenameText)));
+		    
+		    // Determina orientacion
+		    if (orient.equalsIgnoreCase("h"))
+		    	pdfDocument.setDefaultPageSize(PageSize.LETTER.rotate());
+		    
+		    // Convierte
+		    HtmlConverter.convertToPdf(new URL(urlText).openStream(), pdfDocument, properties);
+	
+			// Obtiene archivo
+			//System.out.println("Ruta: " + absolutePath + fileName);
+			File file = new File(absolutePath + filenameText);
+	
+			// Prepara archivo para enviarse al navegador
+			OutputStream out = response.getOutputStream();
+			FileInputStream in = new FileInputStream(file);
+			byte[] buffer = new byte[4096];
+			int length;
+			while ((length = in.read(buffer)) > 0){
+				out.write(buffer, 0, length);
+			}
+			in.close();
+			out.flush();
+	
+			// Elimina el archivo creado
+			file.delete();	
 		
-		HtmlConverter.convertToPdf(new URL(urlText).openStream(), new FileOutputStream(absolutePath + filenameText));
+		} else {
+			System.out.println("Error: parametros nulos");
+			// Set response content type
+		      response.setContentType("text/html");
 
-		// Obtiene archivo
-		File file = new File(absolutePath + filenameText);
-
-		// Prepara archivo para enviarse al navegador
-		OutputStream out = response.getOutputStream();
-		FileInputStream in = new FileInputStream(file);
-		byte[] buffer = new byte[4096];
-		int length;
-		while ((length = in.read(buffer)) > 0){
-			out.write(buffer, 0, length);
+		      // Actual logic goes here.
+		      PrintWriter out = response.getWriter();
+		      out.println("<h1>Error: parametros nulos</h1>");
 		}
-		in.close();
-		out.flush();
+	}
 
-		// Elimina el archivo creado
-		file.delete();	
+	public static String parameterToString(HttpServletRequest request, String name) {
+		String parameter = request.getParameter(name);
+
+		if (parameter != null && !parameter.equals("")) {
+			return parameter; 
+		} else {
+			if (request.getAttribute(name) instanceof String) {
+				parameter = (String)request.getAttribute(name);
+				if (parameter != null && !parameter.equals("")) {
+					return parameter;
+				} else {
+					return "";				
+				}				
+			} else {
+				return "";
+			}
+		}  
 	}
 	
 	// Decodifica una cadena query GET
